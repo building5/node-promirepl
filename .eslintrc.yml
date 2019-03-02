@@ -1,0 +1,16 @@
+---
+root: true
+plugins: [promise]
+rules:
+  # Hard to avoid in this projec
+  no-param-reassign: off
+  # Avoid useless promise wrapping
+  promise/no-return-wrap: error
+  # Ensure consistent param names
+  promise/param-names: error
+  # Avoid swallowed exceptions
+  promise/catch-or-return: error
+env:
+  es6: true
+  node: true
+extends: [airbnb-base]

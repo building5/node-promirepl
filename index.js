@@ -1,65 +1,71 @@
 // Copyright 2014, David M. Lee, II
-'use strict';
 
 /**
  * Add promise support to a repl.
+ *
+ * @param {REPLServer} repl The REPL to enrich with handy promise support
  */
-module.exports.promirepl = function (repl) {
-  var realEval = repl.eval;
-  var promiseEval = function (cmd, context, filename, callback) {
-    realEval.call(repl, cmd, context, filename, function (err, res) {
+module.exports.promirepl = (repl) => {
+  const realEval = repl.eval;
+  function promiseEval(cmd, context, filename, callback) {
+    realEval.call(repl, cmd, context, filename, (err, res) => {
       // Error response
       if (err) {
-        return callback(err);
+        callback(err);
+        return;
       }
 
       // Non-thenable response
-      if (!res || typeof res.then != 'function') {
-        return callback(null, res);
+      if (!res || typeof res.then !== 'function') {
+        callback(null, res);
+        return;
       }
 
       // Thenable detected; extract value/error from it
 
+      let cancel;
+      let hangTimer;
+      let done = (doneErr, val) => {
+        // ensure we call the callback only once
+        // *really* shouldn't be possible, but just in case
+        done = () => {};
+        clearTimeout(hangTimer);
+        process.stdin.removeListener('keypress', cancel);
+        callback(doneErr, val);
+      };
+
       // Start listening for escape characters, to quit waiting on the promise
-      var cancel = function (chunk, key) {
-        repl.outputStream.write('break.\n');
+      cancel = (chunk, key) => {
+        repl.outputStream.write('Hit escape to stop waiting on promise\n');
+        repl.outputStream.write(`${key.name}`);
         if (key.name === 'escape') {
-          process.stdin.removeListener('keypress', cancel);
-          callback(null, res);
-          // Ensure we don't call the callback again
-          callback = function () {};
+          done(null, res);
         }
       };
       process.stdin.on('keypress', cancel);
 
       // Start a timer indicating that escape can be used to quit
-      var hangTimer = setTimeout(function () {
+      hangTimer = setTimeout(() => {
         repl.outputStream.write('Hit escape to stop waiting on promise\n');
       }, 5000);
 
-      res.then(function (val) {
-        process.stdin.removeListener('keypress', cancel);
-        clearTimeout(hangTimer);
-        callback(null, val)
-      }, function (err) {
-        process.stdin.removeListener('keypress', cancel);
-        clearTimeout(hangTimer);
-        repl.outputStream.write('Promise rejected: ');
-        callback(err);
-      }).then(null, function (uncaught) {
-        // Rethrow uncaught exceptions
-        process.nextTick(function () {
-          throw uncaught;
+      // resolve with the value/error from the promise
+      res.then(val => done(null, val), resErr => done(resErr))
+        .catch((uncaught) => {
+          // Rethrow uncaught exceptions
+          // *really* shouldn't be possible, but bugs do happen
+          process.nextTick(() => {
+            throw uncaught;
+          });
         });
-      });
     });
-  };
+  }
 
   repl.eval = promiseEval;
 
-  repl.commands['.promise'] = {
+  repl.commands.promise = {
     help: 'Toggle auto-promise unwrapping',
-    action: function () {
+    action() {
       if (repl.eval === promiseEval) {
         this.outputStream.write('Promise auto-eval disabled\n');
         repl.eval = realEval;
@@ -68,6 +74,6 @@ module.exports.promirepl = function (repl) {
         repl.eval = promiseEval;
       }
       this.displayPrompt();
-    }
-  }
+    },
+  };
 };
