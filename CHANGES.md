@@ -6,6 +6,7 @@
  * Requires at least Node 8 now; 6 is about to hit EOL
    * Maybe it will work on older versions, but I won't be testing it
  * Remove extra . from the help display of .promise
+ * Share history between the node repl and prominode on Node 11.10.0 and later
 
 ## 1.0.1 (2014-11-15)
 
