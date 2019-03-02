@@ -37,7 +37,7 @@ module.exports.promirepl = (repl) => {
       // Start listening for escape characters, to quit waiting on the promise
       cancel = (chunk, key) => {
         if (key.name === 'escape') {
-          repl.outputStream.write('break.');
+          repl.outputStream.write('break.\n');
           done(null, res);
         }
       };

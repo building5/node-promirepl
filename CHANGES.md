@@ -1,5 +1,9 @@
 # promirepl
 
+## v2.0.1 (2019-03-02)
+
+ * Put newline back after `break.`
+
 ## v2.0.0 (2019-03-02)
 
  * Over four years isn't too long between releases, isn't it?
