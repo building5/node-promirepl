@@ -2,8 +2,10 @@
 root: true
 plugins: [promise]
 rules:
-  # Hard to avoid in this projec
+  # Hard to avoid in this project
   no-param-reassign: off
+  # console is useful for CLI apps
+  no-console: off
   # Avoid useless promise wrapping
   promise/no-return-wrap: error
   # Ensure consistent param names
