@@ -10,42 +10,31 @@ This allows you to use promise based APIs from the REPL just as easily as old
 fashioned synchronous APIs, without a lot of messing around with callbacks and
 `console.log` to get at asynchronous values from the REPL.
 
-## Usage
+## Installation
 
 Promirepl can be installed with `npm install -g promirepl`. This installs the
 `prominode` executable, which starts a Node.js REPL that has magical promise
 unwraping capabilities.
 
-Whenever a value evaluates to a promise (well, technically a [thenable][]),
-promirepl will wait for the promise to resolve. If the promise is fulfilled,
-it will evaluate to the promise's value. If the promise is rejected, it will
-work as a thrown error.
+## Usage
 
-If you want to stop waiting on a promise, just hit escape.
-
-If you would like to disable the promirepl magic, just use the `.promise`
-command to toggle promise unwrapping.
-
-    $ npm install -g promirepl
     $ prominode
-    > var Promise = require('es6-promise').Promise
 
 Whenever a value evaluates to a promise (well, technically a [thenable][]),
-promirepl will wait for the promise to resolve. If the promise is fulfilled,
-it will evaluate to the promise's value.
+promirepl will wait for the promise to resolve.
 
     > Promise.resolve('hello')
     'hello'
 
-    > new Promise(function (resolve) {
-    ... setTimeout(function () { resolve('some time later'); }, 3000);
+    > new Promise((resolve) => {
+    ... setTimeout(() => { resolve('some time later'); }, 3000);
     ... })
-    { promise: 'some time later' }
+    'some time later'
 
 If the promise is rejected, it will evaluate as a thrown error.
 
     > Promise.reject(new Error('boom'))
-    Promise rejected: Error: boom
+    Error: boom
         at repl:1:16
         at REPLServer.defaultEval (repl.js:135:27)
 
@@ -68,11 +57,12 @@ If you would like to disable promise unwrapping, enter the `.promise` command.
 
 ## Programmatic Usage
 
-If you would like to use promirepl within your own custom REPL, just use the
+If you would like to use promirepl within your own custom REPL, use the
 exported `promirepl` function.
 
-    var customRepl = createCustomRepl();
-    require('promirepl').promirepl(customRepl.start({}));
+    const customRepl = createCustomRepl();
+    const { promirepl } = require('promirepl');
+    promirepl(customRepl.start({}));
 
  [promise]: https://promisesaplus.com/
  [thenable]: https://promisesaplus.com/#point-7
