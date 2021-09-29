@@ -21,7 +21,7 @@
     "prominode": "./bin/prominode.js"
   },
   "engines": {
-    "node": "^8"
+    "node": ">=8"
   },
   "author": "David M. Lee, II",
   "license": "MIT",
